@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 from modules.products.model import ProductModel
 from helpers.db import product_collection
 from helpers.pagination import get_pagination, Pagination
@@ -10,11 +10,12 @@ router = APIRouter(prefix="/products",
                    tags=['Product'], dependencies=[Depends(JWTBearer())])
 
 
-@router.get('/')
+@router.get('')
 async def get_all(pagination: Pagination = Depends(get_pagination)):
+    total = await product_collection.count_documents({})
     products = await product_collection.find({}).skip(pagination.skip).limit(pagination.limit).to_list(length=None)
     data = parse_object_id(products)
-    return {"success": True, 'data': data}
+    return {"success": True, 'data': data, 'metadata': {'total': total}}
 
 
 @router.get('/{id}')
@@ -26,7 +27,7 @@ async def get_by_id(id: str):
         return {'success': False, 'message': "Not found"}
 
 
-@router.post("/")
+@router.post("")
 async def create(body: ProductModel):
     document = await product_collection.insert_one({'_id': ObjectId(), **body.model_dump()})
     return {"success": True, 'data': str(document.inserted_id)}

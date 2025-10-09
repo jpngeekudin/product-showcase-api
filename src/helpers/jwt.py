@@ -10,7 +10,7 @@ secret = os.getenv('JWT_SECRET')
 
 
 def sign_jwt(user: UserModel):
-    payload = {**user, 'expires': time.time() + 600}
+    payload = {**user, 'expires': time.time() + 60 * 60 * 24}
     del payload['password']
     token = jwt.encode(payload, secret, algorithm='HS256')
     return token_response(token)
