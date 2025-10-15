@@ -9,6 +9,7 @@ upload_dir = 'upload'
 
 class FileCategory(str, Enum):
     PRODUCT_IMAGE = 'product_image'
+    USER_IMAGE = 'user_image'
 
 
 router = APIRouter(

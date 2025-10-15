@@ -10,11 +10,12 @@ router = APIRouter(
     prefix='/user', tags=["User"], dependencies=[Depends(JWTBearer())])
 
 
-@router.get('/')
+@router.get('')
 async def get_users(pagination: Pagination = Depends(get_pagination)):
+    total = await user_collection.count_documents({})
     documents = await user_collection.find({}).skip(pagination.skip).limit(pagination.limit).to_list()
     data = parse_object_id(documents)
-    return {"success": True, "data": data}
+    return {"success": True, "data": data, 'metadata': {'total': total}}
 
 
 @router.get('/{id}')
@@ -22,6 +23,12 @@ async def get_user_by_id(id: str):
     document = await user_collection.find_one({'_id': ObjectId(id)})
     data = parse_object_id(document)
     return {"success": True, "data": data}
+
+
+@router.post('')
+async def create(body: UserModel):
+    document = await user_collection.insert_one({'_id': ObjectId(), **body.model_dump()})
+    return {"success": True, 'data': str(document.inserted_id)}
 
 
 @router.put('/{id}')
