@@ -14,7 +14,7 @@ async def login(body: LoginIn):
     user = await user_collection.find_one({"username": body.username, 'password': hashed_password}, {'_id': 0})
     if user:
         signed = sign_jwt(user)
-        return {"success": True, "data": signed}
+        return {"success": True, "data": {'token': signed, 'user': user}}
     else:
         return {"success": False, "message": 'Invalid login'}
 
