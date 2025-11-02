@@ -5,6 +5,7 @@ from helpers.pagination import get_pagination, Pagination
 from helpers.bson import parse_object_id
 from modules.users.model import UserModel
 from helpers.jwt_bearer import JWTBearer
+import hashlib
 
 router = APIRouter(
     prefix='/user', tags=["User"], dependencies=[Depends(JWTBearer())])
@@ -27,14 +28,15 @@ async def get_user_by_id(id: str):
 
 @router.post('')
 async def create(body: UserModel):
-    document = await user_collection.insert_one({'_id': ObjectId(), **body.model_dump()})
+    hashed_password = hashlib.md5(body.password.encode()).hexdigest()
+    document = await user_collection.insert_one({'_id': ObjectId(), **body.model_dump(), 'password': hashed_password})
     return {"success": True, 'data': str(document.inserted_id)}
 
 
 @router.put('/{id}')
 async def update_user(id: str, body: UserModel):
-    document = await user_collection.update_one({'_id': ObjectId(id)}, body.model_dump())
-    return {"success": True, "data": document}
+    document = await user_collection.update_one({'_id': ObjectId(id)}, {'$set': body.model_dump()})
+    return {"success": True, "data": document.raw_result}
 
 
 @router.delete('/{id}')

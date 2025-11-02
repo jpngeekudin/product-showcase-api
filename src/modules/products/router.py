@@ -35,8 +35,8 @@ async def create(body: ProductModel):
 
 @router.put('/{id}')
 async def update(id: str, body: ProductModel):
-    document = await product_collection.update_one({'_id': ObjectId(id)}, body.model_dump())
-    return {"success": True, 'data': document}
+    document = await product_collection.update_one({'_id': ObjectId(id)}, {'$set': body.model_dump()})
+    return {"success": True, 'data': document.raw_result}
 
 
 @router.delete('/{id}')
